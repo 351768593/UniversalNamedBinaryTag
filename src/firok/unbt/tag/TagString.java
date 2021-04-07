@@ -11,7 +11,6 @@ import java.util.Objects;
  */
 public class TagString extends TagBase
 {
-	public static final int TYPE = 0b0000_0100;
 	private String value;
 
 	public String getValue()
@@ -24,7 +23,7 @@ public class TagString extends TagBase
 		this.value = value;
 	}
 
-	protected TagString(String name, String value)
+	public TagString(String name, String value)
 	{
 		super(name);
 		this.value = value;
@@ -41,7 +40,7 @@ public class TagString extends TagBase
 	}
 
 	@Override
-	public void readData(UNBTFactory.ReadingContext context, DataInputStream dis) throws IOException
+	public void readData(UNBTReadingContext context, DataInputStream dis) throws IOException
 	{
 		int valueRelatedBytes = dis.readInt();
 		if(valueRelatedBytes == 0) this.value = "";
@@ -61,7 +60,7 @@ public class TagString extends TagBase
 	}
 
 	@Override
-	public void writeData(UNBTFactory.WritingContext context, DataOutputStream dos) throws IOException
+	public void writeData(UNBTWritingContext context, DataOutputStream dos) throws IOException
 	{
 		// currently we will only write value directly
 		byte[] cache = this.value.getBytes(StandardCharsets.UTF_8);

@@ -5,21 +5,21 @@ import firok.unbt.exception.UnexpectedTagTypeException;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
  * 复合标签
  */
 public class TagCompact extends TagBase
-	implements Iterable<TagBase>
+	implements Iterable<TagBase>, ICompactStack
 {
-	public static final int TYPE = 0b0010_0000;
-
 	public TagCompact(String name)
 	{
 		super(name);
 	}
-	public TagCompact() { super(); }
+	protected TagCompact() { super(); }
 
 	private Map<String,TagBase> tags = new LinkedHashMap<>();
 
@@ -92,7 +92,53 @@ public class TagCompact extends TagBase
 	public boolean hasLong(String name,long value)
 	{
 		TagBase tag = get(name);
-		return get(name) instanceof TagLong && ((TagLong) tag).getValue() == value;
+		return tag instanceof TagLong && ((TagLong) tag).getValue() == value;
+	}
+
+	// float methods
+	public float getFloat(String name)
+	{
+		TagBase tag = get(name);
+		if(tag instanceof TagFloat) return ((TagFloat) tag).getValue();
+		else throw new UnexpectedTagTypeException("Invalid tag type");
+	}
+	public void setFloat(String name,float value)
+	{
+		TagBase tag = get(name);
+		if(tag instanceof TagFloat) ((TagFloat) tag).setValue(value);
+		else set(new TagFloat(name,value));
+	}
+	public boolean hasFloat(String name)
+	{
+		return get(name) instanceof TagFloat;
+	}
+	public boolean hasFloat(String name,float value)
+	{
+		TagBase tag = get(name);
+		return tag instanceof TagFloat && ((TagFloat) tag).getValue() == value;
+	}
+
+	// double methods
+	public double getDouble(String name)
+	{
+		TagBase tag = get(name);
+		if(tag instanceof TagDouble) return ((TagDouble) tag).getValue();
+		else throw new UnexpectedTagTypeException("Invalid tag type");
+	}
+	public void setDouble(String name,double value)
+	{
+		TagBase tag = get(name);
+		if(tag instanceof TagDouble) ((TagDouble) tag).setValue(value);
+		else set(new TagDouble(name,value));
+	}
+	public boolean hasDouble(String name)
+	{
+		return get(name) instanceof TagDouble;
+	}
+	public boolean hasDouble(String name,double value)
+	{
+		TagBase tag = get(name);
+		return tag instanceof TagDouble && ((TagDouble) tag).getValue() == value;
 	}
 
 	// string methods
@@ -119,18 +165,96 @@ public class TagCompact extends TagBase
 		// yes, tag value cannot be null, so this is safe
 	}
 
+	// BigInteger methods
+	public BigInteger getBigInteger(String name)
+	{
+		TagBase tag = get(name);
+		if(tag instanceof TagBigInteger) return ((TagBigInteger) tag).getValue();
+		else throw new UnexpectedTagTypeException("Invalid tag type");
+	}
+	public void setDouble(String name,BigInteger value)
+	{
+		TagBase tag = get(name);
+		if(tag instanceof TagBigInteger) ((TagBigInteger) tag).setValue(value);
+		else set(new TagBigInteger(name,value));
+	}
+	public boolean hasBigInteger(String name)
+	{
+		return get(name) instanceof TagBigInteger;
+	}
+	public boolean hasBigInteger(String name,BigInteger value)
+	{
+		TagBase tag = get(name);
+		return tag instanceof TagBigInteger && ((TagBigInteger) tag).getValue().compareTo(value)==0;
+	}
+
+	// BigDecimal methods
+	public BigDecimal getBigDecimal(String name)
+	{
+		TagBase tag = get(name);
+		if(tag instanceof TagBigDecimal) return ((TagBigDecimal) tag).getValue();
+		else throw new UnexpectedTagTypeException("Invalid tag type");
+	}
+	public void setBigDecimal(String name,BigDecimal value)
+	{
+		TagBase tag = get(name);
+		if(tag instanceof TagBigDecimal) ((TagBigDecimal) tag).setValue(value);
+		else set(new TagBigDecimal(name,value));
+	}
+	public boolean hasBigDecimal(String name)
+	{
+		return get(name) instanceof TagBigDecimal;
+	}
+	public boolean hasBigDecimal(String name,BigDecimal value)
+	{
+		TagBase tag = get(name);
+		return tag instanceof TagBigDecimal && ((TagBigDecimal) tag).getValue().compareTo(value)==0;
+	}
+
+	// Date methods
+	public Date getDate(String name)
+	{
+		TagBase tag = get(name);
+		if(tag instanceof TagDate) return ((TagDate) tag).getValue();
+		else throw new UnexpectedTagTypeException("Invalid tag type");
+	}
+	public long getDateTimestamp(String name)
+	{
+		return getDate(name).getTime();
+	}
+	public void setDate(String name,Date value)
+	{
+		TagBase tag = get(name);
+		if(tag instanceof TagDate) ((TagDate) tag).setValue(value);
+		else set(new TagDate(name,value));
+	}
+	public void setDateTimestamp(String name,long value)
+	{
+		setDate(name,new Date(value));
+	}
+	public boolean hasDate(String name)
+	{
+		return get(name) instanceof TagDate;
+	}
+	public boolean hasDate(String name,long value)
+	{
+		TagBase tag = get(name);
+		return tag instanceof TagDate && ((TagDate) tag).getValue().getTime() == value;
+	}
+	public boolean hasDate(String name,Date value)
+	{
+		return hasDate(name,value.getTime());
+	}
+
 	// compact methods
-	/**
-	 * @return 当前标签栈
-	 */
-	private Collection<TagCompact> calcCompactStack()
+	public Collection<TagCompact> calcCompactStack()
 	{
 		Collection<TagCompact> ret = new ArrayList<>(this.tags.size() + 1);
 		ret.add(this);
 		for(TagBase tag : this.tags.values())
 		{
-			if(tag instanceof TagCompact)
-				ret.addAll(((TagCompact) tag).calcCompactStack());
+			if(tag instanceof ICompactStack)
+				ret.addAll(((ICompactStack) tag).calcCompactStack());
 		}
 		return ret;
 	}
@@ -158,7 +282,7 @@ public class TagCompact extends TagBase
 	}
 
 	@Override
-	public void readData(UNBTFactory.ReadingContext context, DataInputStream dis) throws IOException
+	public void readData(UNBTReadingContext context, DataInputStream dis) throws IOException
 	{
 		this.tags.clear();
 		TagBase tag;
@@ -172,7 +296,7 @@ public class TagCompact extends TagBase
 	}
 
 	@Override
-	public void writeData(UNBTFactory.WritingContext context, DataOutputStream dos) throws IOException
+	public void writeData(UNBTWritingContext context, DataOutputStream dos) throws IOException
 	{
 		for(TagBase tag : tags.values())
 		{

@@ -7,8 +7,6 @@ import java.util.Objects;
 
 public class TagLong extends TagBase
 {
-	public static final int TYPE = 0b0000_0010;
-
 	private long value;
 	public long getValue()
 	{
@@ -24,7 +22,7 @@ public class TagLong extends TagBase
 		super(name);
 		this.value = value;
 	}
-	public TagLong() { super(); }
+	protected TagLong() { super(); }
 
 	@Override
 	public boolean isArrayType()
@@ -33,14 +31,14 @@ public class TagLong extends TagBase
 	}
 
 	@Override
-	public void readData(UNBTFactory.ReadingContext context, DataInputStream dis)
+	public void readData(UNBTReadingContext context, DataInputStream dis)
 			throws IOException
 	{
 		this.value = dis.readLong();
 	}
 
 	@Override
-	public void writeData(UNBTFactory.WritingContext context, DataOutputStream dos)
+	public void writeData(UNBTWritingContext context, DataOutputStream dos)
 			throws IOException
 	{
 		dos.writeLong(this.value);
@@ -51,7 +49,7 @@ public class TagLong extends TagBase
 	{
 		if(!(obj instanceof TagLong)) return false;
 		TagLong tag = (TagLong) obj;
-		return Objects.equals(tag.getName(),this.getName()) && tag.getValue() == value;
+		return Objects.equals(tag.getName(),this.getName()) && tag.value == value;
 	}
 
 	@Override

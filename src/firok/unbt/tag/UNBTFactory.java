@@ -4,124 +4,21 @@ import firok.unbt.exception.UnexpectedMetaTypeException;
 import firok.unbt.exception.UnexpectedTagTypeException;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class UNBTFactory
 {
-	public static class ReadingContext
-	{
-		/**
-		 * 标签名称相关映射
-		 */
-		final Map<Integer,String> mappingTagName;
-
-		/**
-		 * 需要置入缓存池的字符串
-		 */
-		final Collection<String> internTagName;
-
-		/**
-		 * @param sync 是否采用同步模式
-		 */
-		public ReadingContext(boolean sync)
-		{
-			if(sync)
-			{
-				mappingTagName = new ConcurrentHashMap<>();
-			}
-			else
-			{
-				mappingTagName = new HashMap<>();
-			}
-
-			internTagName = Collections.emptyList();
-		}
-
-		/**
-		 * @param mappingTagName 给定名称映射
-		 */
-		public ReadingContext(Map<Integer,String> mappingTagName)
-		{
-			this.mappingTagName = mappingTagName;
-
-			internTagName = Collections.emptyList();
-		}
-
-		/**
-		 * @param tagType 读取到的标签类型数据
-		 * @return 构建的标签结果
-		 * @implNote 如果需要扩展更多类型标签, 需要在子类覆写此方法
-		 */
-		public TagBase constructTag(final int tagType)
-		{
-			switch (tagType)
-			{
-				case TagEnd.TYPE: return TagEnd.INSTANCE;
-
-				case TagInt.TYPE: return new TagInt();
-				case TagLong.TYPE: return new TagLong();
-				case TagString.TYPE: return new TagString();
-				case TagCompact.TYPE: return new TagCompact();
-				default: return null;
-			}
-		}
-
-		public final String computeString(byte[] bytes)
-		{
-			String ret = new String(bytes,StandardCharsets.UTF_8);
-			if(internTagName.contains(ret))
-				ret = ret.intern();
-			return ret;
-		}
-	}
-	public static class WritingContext
-	{
-		private int ref = -1;
-		private Map<String,Integer> mappingNameRef = new HashMap<>();
-		private Map<String,byte[]> mappingNameCache = new HashMap<>();
-
-		public synchronized int calcStringRef(String tagName)
-		{
-			Integer ret = mappingNameRef.get(tagName);
-			if(ret == null)
-			{
-				mappingNameRef.put(tagName, ref);
-				mappingNameCache.put(tagName,tagName.getBytes(StandardCharsets.UTF_8));
-				ret = ref;
-				ref--;
-			}
-			return ret;
-		}
-
-		public synchronized byte[] calcStringBytes(String tagName)
-		{
-			return mappingNameCache.get(tagName);
-		}
-
-		/**
-		 * @param tag 标签数据
-		 * @return 解构的标签类型数据
-		 * @implNote 如果需要扩展更多类型标签, 需要在子类覆写此方法
-		 */
-		public int deconstructTag(TagBase tag)
-		{
-			Class<? extends TagBase> classTag = tag.getClass();
-			if(classTag == TagEnd.class) return TagEnd.TYPE;
-			else if(classTag == TagInt.class) return TagInt.TYPE;
-			else if(classTag == TagLong.class) return TagLong.TYPE;
-			else if(classTag == TagString.class) return TagString.TYPE;
-			else if(classTag == TagCompact.class) return TagCompact.TYPE;
-			else return -1; // that shouldn't be
-		}
-	}
-
 	public static TagBase read(DataInputStream dis) throws IOException
 	{
-		return read(dis, new ReadingContext(false));
+		return read(dis, new UNBTReadingContext(false));
 	}
-	public static TagBase read(DataInputStream dis, ReadingContext context) throws IOException
+
+	/**
+	 * @param dis 输入流
+	 * @param context 反序列化上下文
+	 * @return 标签数据, 如果流中只有元数据则返回null
+	 * @throws IOException 读取发生错误
+	 */
+	public static TagBase read(DataInputStream dis, UNBTReadingContext context) throws IOException
 	{
 		/*
 			0 - ready for tag header,
@@ -241,7 +138,14 @@ public class UNBTFactory
 		return null;
 	}
 
-	public static void write(DataOutputStream dos, WritingContext context, TagBase tag) throws IOException
+	/**
+	 * 将一个标签写入至输出流
+	 * @param dos 输出流
+	 * @param context 序列化上下文
+	 * @param tag 本次需要序列化的标签数据
+	 * @throws IOException 序列化发生错误
+	 */
+	public static void write(DataOutputStream dos, UNBTWritingContext context, TagBase tag) throws IOException
 	{
 		// get tag type
 		int tagType = context.deconstructTag(tag);
@@ -282,5 +186,34 @@ public class UNBTFactory
 		}
 
 		tag.writeData(context, dos);
+	}
+
+	public static void write(File file,TagBase tag) throws IOException
+	{
+		writePlain(file, tag);
+	}
+	private static void writePlain(File file,TagBase tag) throws IOException
+	{
+		try(
+				OutputStream os = new FileOutputStream(file);
+				DataOutputStream dos = new DataOutputStream(os);
+		) {
+			UNBTFactory.write(dos,new UNBTWritingContext(),tag);
+			dos.flush();
+		}
+	}
+
+	public static TagBase read(File file) throws IOException
+	{
+		return readPlain(file);
+	}
+	public static TagBase readPlain(File file) throws IOException
+	{
+		try(
+				InputStream is = new FileInputStream(file);
+				DataInputStream dis = new DataInputStream(is);
+		){
+			return UNBTFactory.read(dis);
+		}
 	}
 }

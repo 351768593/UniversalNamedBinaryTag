@@ -7,8 +7,6 @@ import java.util.Objects;
 
 public class TagInt extends TagBase
 {
-	public static final int TYPE = 0b0000_0001;
-
 	int value;
 	public int getValue()
 	{
@@ -19,7 +17,7 @@ public class TagInt extends TagBase
 		this.value = value;
 	}
 
-	protected TagInt(String name,int value)
+	public TagInt(String name,int value)
 	{
 		super(name);
 		this.value = value;
@@ -29,14 +27,14 @@ public class TagInt extends TagBase
 	@Override public boolean isArrayType() { return false; }
 
 	@Override
-	public void readData(UNBTFactory.ReadingContext context, DataInputStream dis)
+	public void readData(UNBTReadingContext context, DataInputStream dis)
 			throws IOException
 	{
 		this.value = dis.readInt();
 	}
 
 	@Override
-	public void writeData(UNBTFactory.WritingContext context, DataOutputStream dos) throws IOException
+	public void writeData(UNBTWritingContext context, DataOutputStream dos) throws IOException
 	{
 		dos.writeInt(this.value);
 	}
@@ -46,7 +44,7 @@ public class TagInt extends TagBase
 	{
 		if(!(obj instanceof TagInt)) return false;
 		TagInt tag = (TagInt) obj;
-		return Objects.equals(tag.getName(),this.getName()) && tag.getValue() == value;
+		return Objects.equals(tag.getName(),this.getName()) && tag.value == value;
 	}
 
 	@Override

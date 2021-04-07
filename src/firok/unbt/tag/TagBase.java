@@ -56,7 +56,7 @@ public abstract class TagBase
 	 * @param dis 反序列化输入流
 	 * @throws IOException 反序列化错误
 	 */
-	public abstract void readData(UNBTFactory.ReadingContext context, DataInputStream dis) throws IOException;
+	public abstract void readData(UNBTReadingContext context, DataInputStream dis) throws IOException;
 
 	/**
 	 * 子类应当实现这个方法, 用于向序列化输出流中输出自身的值
@@ -64,14 +64,15 @@ public abstract class TagBase
 	 * @param dos 序列化输出流
 	 * @throws IOException 序列化错误
 	 */
-	public abstract void writeData(UNBTFactory.WritingContext context, DataOutputStream dos) throws IOException;
+	public abstract void writeData(UNBTWritingContext context, DataOutputStream dos) throws IOException;
+
 	/**
 	 * 这个接口是对通用序列化过程的封装
 	 * @param context 序列化上下文
 	 * @param dos 序列化输出流
 	 * @throws IOException 序列化错误
 	 */
-	public void write(UNBTFactory.WritingContext context, DataOutputStream dos, boolean useRef)
+	public void write(UNBTWritingContext context, DataOutputStream dos, boolean useRef)
 			throws IOException
 	{
 		if(useRef)
