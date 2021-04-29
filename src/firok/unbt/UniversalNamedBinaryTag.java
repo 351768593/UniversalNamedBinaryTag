@@ -8,7 +8,7 @@ public class UniversalNamedBinaryTag
 	public static final String name = "Universal Named Binary Tag";
 	public static final String shortName = "unbt";
 	public static final String author = "Firok";
-	public static final String version = "0.2.0";
+	public static final String version = "0.3.0";
 
 	public static final int TYPE_END            = 0b0001_1111;
 

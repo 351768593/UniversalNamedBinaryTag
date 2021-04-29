@@ -8,6 +8,7 @@ public class UnexpectedTagTypeException
 {
 	public UnexpectedTagTypeException()
 	{
+		this("Invalid tag type");
 	}
 
 	public UnexpectedTagTypeException(String message)

@@ -54,7 +54,7 @@ public class TagCompact extends TagBase
 	{
 		TagBase tag = get(name);
 		if(tag instanceof TagInt) return ((TagInt) tag).getValue();
-		else throw new UnexpectedTagTypeException("Invalid tag type");
+		else throw new UnexpectedTagTypeException();
 	}
 	public void setInt(String name,int value)
 	{
@@ -77,7 +77,7 @@ public class TagCompact extends TagBase
 	{
 		TagBase tag = get(name);
 		if(tag instanceof TagLong) return ((TagLong) tag).getValue();
-		else throw new UnexpectedTagTypeException("Invalid tag type");
+		else throw new UnexpectedTagTypeException();
 	}
 	public void setLong(String name,long value)
 	{
@@ -100,7 +100,7 @@ public class TagCompact extends TagBase
 	{
 		TagBase tag = get(name);
 		if(tag instanceof TagFloat) return ((TagFloat) tag).getValue();
-		else throw new UnexpectedTagTypeException("Invalid tag type");
+		else throw new UnexpectedTagTypeException();
 	}
 	public void setFloat(String name,float value)
 	{
@@ -123,7 +123,7 @@ public class TagCompact extends TagBase
 	{
 		TagBase tag = get(name);
 		if(tag instanceof TagDouble) return ((TagDouble) tag).getValue();
-		else throw new UnexpectedTagTypeException("Invalid tag type");
+		else throw new UnexpectedTagTypeException();
 	}
 	public void setDouble(String name,double value)
 	{
@@ -146,7 +146,7 @@ public class TagCompact extends TagBase
 	{
 		TagBase tag = get(name);
 		if(tag instanceof TagString) return ((TagString) tag).getValue();
-		else throw new UnexpectedTagTypeException("Invalid tag type");
+		else throw new UnexpectedTagTypeException();
 	}
 	public void setString(String name,String value)
 	{
@@ -170,7 +170,7 @@ public class TagCompact extends TagBase
 	{
 		TagBase tag = get(name);
 		if(tag instanceof TagBigInteger) return ((TagBigInteger) tag).getValue();
-		else throw new UnexpectedTagTypeException("Invalid tag type");
+		else throw new UnexpectedTagTypeException();
 	}
 	public void setDouble(String name,BigInteger value)
 	{
@@ -193,7 +193,7 @@ public class TagCompact extends TagBase
 	{
 		TagBase tag = get(name);
 		if(tag instanceof TagBigDecimal) return ((TagBigDecimal) tag).getValue();
-		else throw new UnexpectedTagTypeException("Invalid tag type");
+		else throw new UnexpectedTagTypeException();
 	}
 	public void setBigDecimal(String name,BigDecimal value)
 	{
@@ -216,7 +216,7 @@ public class TagCompact extends TagBase
 	{
 		TagBase tag = get(name);
 		if(tag instanceof TagDate) return ((TagDate) tag).getValue();
-		else throw new UnexpectedTagTypeException("Invalid tag type");
+		else throw new UnexpectedTagTypeException();
 	}
 	public long getDateTimestamp(String name)
 	{
@@ -262,7 +262,7 @@ public class TagCompact extends TagBase
 	{
 		TagBase tag = get(name);
 		if(tag instanceof TagCompact) return (TagCompact) tag;
-		else throw new UnexpectedTagTypeException("Invalid tag type");
+		else throw new UnexpectedTagTypeException();
 	}
 	public void setCompact(TagCompact value)
 	{
@@ -274,6 +274,119 @@ public class TagCompact extends TagBase
 	{
 		return get(name) instanceof TagCompact;
 	}
+
+	// int[] methods
+	public int[] getIntArray(String name)
+	{
+		TagBase tag = get(name);
+		if(tag instanceof TagIntArray) return ((TagIntArray)tag).getValue().clone();
+		else throw new UnexpectedTagTypeException();
+	}
+	public void setIntArray(String name,int[] value)
+	{
+		TagBase tag = get(name);
+		if(tag instanceof TagIntArray) ((TagIntArray)tag).setValue(value);
+		else set(new TagIntArray(name,value));
+	}
+	public boolean hasIntArray(String name)
+	{
+		return get(name) instanceof TagIntArray;
+	}
+	public boolean hasIntArray(String name,int[] value)
+	{
+		TagBase tag = get(name);
+		return tag instanceof TagIntArray && Arrays.equals(((TagIntArray)tag).getValue(),value);
+	}
+	// long[] methods
+	public long[] getLongArray(String name)
+	{
+		TagBase tag = get(name);
+		if(tag instanceof TagLongArray) return ((TagLongArray)tag).getValue().clone();
+		else throw new UnexpectedTagTypeException();
+	}
+	public void setLongArray(String name,long[] value)
+	{
+		TagBase tag = get(name);
+		if(tag instanceof TagLongArray) ((TagLongArray)tag).setValue(value);
+		else set(new TagLongArray(name,value));
+	}
+	public boolean hasLongArray(String name)
+	{
+		return get(name) instanceof TagLongArray;
+	}
+	public boolean hasLongArray(String name,long[] value)
+	{
+		TagBase tag = get(name);
+		return tag instanceof TagLongArray && Arrays.equals(((TagLongArray)tag).getValue(),value);
+	}
+	// float[] methods
+	public float[] getFloatArray(String name)
+	{
+		TagBase tag = get(name);
+		if(tag instanceof TagFloatArray) return ((TagFloatArray)tag).getValue().clone();
+		else throw new UnexpectedTagTypeException();
+	}
+	public void setFloatArray(String name,float[] value)
+	{
+		TagBase tag = get(name);
+		if(tag instanceof TagFloatArray) ((TagFloatArray)tag).setValue(value);
+		else set(new TagFloatArray(name,value));
+	}
+	public boolean hasFloatArray(String name)
+	{
+		return get(name) instanceof TagFloatArray;
+	}
+	public boolean hasFloatArray(String name,float[] value)
+	{
+		TagBase tag = get(name);
+		return tag instanceof TagFloatArray && Arrays.equals(((TagFloatArray)tag).getValue(),value);
+	}
+	// double[] methods
+	public double[] getDoubleArray(String name)
+	{
+		TagBase tag = get(name);
+		if(tag instanceof TagDoubleArray) return ((TagDoubleArray)tag).getValue().clone();
+		else throw new UnexpectedTagTypeException();
+	}
+	public void setDoubleArray(String name,double[] value)
+	{
+		TagBase tag = get(name);
+		if(tag instanceof TagDoubleArray) ((TagDoubleArray)tag).setValue(value);
+		else set(new TagDoubleArray(name,value));
+	}
+	public boolean hasDoubleArray(String name)
+	{
+		return get(name) instanceof TagDoubleArray;
+	}
+	public boolean hasDoubleArray(String name,double[] value)
+	{
+		TagBase tag = get(name);
+		return tag instanceof TagDoubleArray && Arrays.equals(((TagDoubleArray)tag).getValue(),value);
+	}
+
+	// byte[] methods
+	public byte[] getByteArray(String name)
+	{
+		TagBase tag = get(name);
+		if(tag instanceof TagByteArray) return ((TagByteArray) tag).getValue().clone();
+		else throw new UnexpectedTagTypeException();
+	}
+	public void setByteArray(String name,byte[] value)
+	{
+		TagBase tag = get(name);
+		if(tag instanceof TagByteArray) ((TagByteArray) tag).setValue(value);
+		else set(new TagByteArray(name,value));
+	}
+	public boolean hasByteArray(String name)
+	{
+		return get(name) instanceof TagByteArray;
+	}
+	public boolean hasByteArray(String name,byte[] value)
+	{
+		TagBase tag = get(name);
+		return tag instanceof TagByteArray && Arrays.equals(((TagByteArray) tag).getValue(),value);
+	}
+
 
 	@Override
 	public boolean isArrayType()
